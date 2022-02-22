@@ -1,0 +1,22 @@
+variables:
+  deploymentName: 
+  subscription: 
+  location: 
+  resourceGroup: 
+  otherUserSecurityGroupName: 
+  privateLinkVNet: 
+  privateLinkVNetResourceGroup: 
+  privateLinkSubnet: 
+  endPoint: 
+  Owner: 
+  CreatedBy: 
+  keyVaultName:
+  sku: 
+  tenant: 
+  enabledForDeployment: true
+  enabledForTemplateDeployment: true
+  enabledForDiskEncryption: true
+  enableRbacAuthorization: false
+  enableSoftDelete: false
+  softDeleteRetentionInDays: 30
+  enablePurgeProtection: true

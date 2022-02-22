@@ -1,0 +1,11 @@
+variables:
+  RecordType: "" 
+  Action: ""
+  Environment: ""
+  Zone: ""
+  IP: ""
+  RecordName: ""
+  Email: ""
+  ARecord: ""
+  CNAME_Record: ""
+  Exist_Record: ""

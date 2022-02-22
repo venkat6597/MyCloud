@@ -1,0 +1,28 @@
+  
+trigger: none
+resources:
+  repositories:
+  - repository: 
+    type: github
+    endpoint: 
+    name: 
+    ref : 
+jobs:
+  - job: AKV_creation
+    pool:
+      name: 
+    variables:
+    - template: inputs_keyvault.yml
+
+    steps:
+    - checkout: 
+    - checkout: self
+    - task: AzurePowerShell@5
+      displayName: AKV_creation
+      inputs:
+        azureSubscription: 
+        ScriptType: 'FilePath'
+        ScriptPath: 'MyCloud/Arm-Template/keyvault/devops-pipeline/azuredevops/wrapper_script_keyvault.ps1'
+        ScriptArguments: "-deploymentName '$(deploymentName)' -subscription '$(subscription)' -location '$(location)' -resourceGroup '$(resourceGroup)' -otherUserSecurityGroupName '$(otherUserSecurityGroupName)' -privateLinkVNet '$(privateLinkVNet)' -privateLinkVNetResourceGroup '$(privateLinkVNetResourceGroup)'  -privateLinkSubnet '$(privateLinkSubnet)' -endPoint '$(endPoint)' -Owner '$(Owner)' -CreatedBy '$(CreatedBy)' -keyVaultName '$(keyVaultName)'  -sku '$(sku)' -tenant '$(tenant)' -enabledForDeployment '$(enabledForDeployment)' -enabledForTemplateDeployment '$(enabledForTemplateDeployment)'  -enabledForDiskEncryption '$(enabledForDiskEncryption)' -enableRbacAuthorization '$(enableRbacAuthorization)'  -enableSoftDelete '$(enableSoftDelete)' -softDeleteRetentionInDays '$(softDeleteRetentionInDays)'  -enablePurgeProtection '$(enablePurgeProtection)'"
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
