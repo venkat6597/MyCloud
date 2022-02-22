@@ -1,0 +1,253 @@
+name: Infoblox-DNS-Record
+ 
+env:
+  username: ${{ secrets.I}}
+  password: ${{ secrets.I}}
+  hostip: ${{ secrets.I }}
+  GITHUB_CREDENTIAL: 
+  GITHUB_TOKEN: ${{ secrets.PAT }}
+
+on: 
+  
+  #pull_request:
+
+  #push:
+    paths:
+      #- '.github/workflows/'      
+      
+jobs:
+
+ check:
+
+    runs-on: 
+    name: check for file 
+    outputs:
+      run_job: ${{ steps.check_files.outputs.run_job }}
+      parameter_file: ${{ steps.check_files.outputs.parameter_file }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: check file existing
+        id: check_files
+        run: |
+          set -x
+          sha=`git log --format="%H" -n 1`
+          echo "===============Check for Parameter file=========="
+          parameter=$(git diff --name-only HEAD^ HEAD | grep ".*.yaml") # get parameter path file 
+          echo $parameter
+          environment_name=$(yq -r .variables.Environment $parameter)
+          if [ $environment_name == Production ]
+          then
+            echo "::set-output name=run_job::true"
+            echo "::set-output name=parameter_file::$parameter"
+          else
+            echo "::set-output name=run_job::false"
+            echo "::set-output name=parameter_file::$parameter"
+          fi 
+        shell: bash 
+
+
+ DNS_Apply_NonProd:
+    needs: check
+    runs-on: 
+    if: |
+      !failure() && !cancelled() && 
+      (needs.check.outputs.run_job == 'false')
+    environment:
+      name: nonprod
+    outputs:
+      output1: ${{ steps.input-script.outputs.Email }}
+      output2: ${{ steps.input-script.outputs.param }}
+      output3: ${{ steps.branch-name.outputs.current_branch }}
+      action: ${{ steps.input-script.outputs.Action }}
+      exist: ${{ steps.input-script.outputs.Exist_Record }}
+      ip: ${{ steps.input-script.outputs.IP }}
+      recname: ${{ steps.input-script.outputs.RecordName }}
+      zn: ${{ steps.input-script.outputs.Zone }}
+      exc: ${{ steps.input-script.outputs.Exist_Record }}
+      rect: ${{ steps.input-script.outputs.RecordType }}
+      alias: ${{ steps.input-script.outputs.ARecord }}
+      cname: ${{ steps.input-script.outputs.CNAME_Record }}
+
+      
+      
+    steps:
+       - uses: actions/checkout@v1
+       - name: Input Script
+         id: input-script
+         run: |
+           set -x
+           sha=`git log --format="%H" -n 1` # fetch latest commit sha 
+           echo "sha is printed"
+           echo $sha
+           parameter=$(git diff-tree -m --no-commit-id --name-only -r $sha | grep ".*.yaml") # get parameter path file 
+           echo "parameter is printed"
+           cat $parameter
+           echo $parameter
+           sudo add-apt-repository universe
+           sudo apt-get update
+           sudo apt-get install python3-pip
+           pip3 install yq
+           Action=$(yq -r .variables.Action $parameter)
+           RecordType=$(yq -r .variables.RecordType $parameter)
+           Environment=$(yq -r .variables.Environment $parameter)
+           Zone=$(yq -r .variables.Zone $parameter)
+           IP=$(yq -r .variables.IP $parameter)
+           RecordName=$(yq -r .variables.RecordName $parameter)
+           ARecord=$(yq -r .variables.ARecord $parameter)
+           CNAME_Record=$(yq -r .variables.CNAME_Record $parameter)
+           Exist_Record=$(yq -r .variables.Exist_Record $parameter)
+           Email=$(yq -r .variables.Email $parameter)
+           echo "::set-output name=param::$parameter"
+           echo "::set-output name=Action::$Action"
+           echo "::set-output name=RecordType::$RecordType"
+           echo "::set-output name=Environment::$Environment"
+           echo "::set-output name=Zone::$Zone"
+           echo "::set-output name=RecordName::$RecordName"
+           echo "::set-output name=ARecord::$ARecord"
+           echo "::set-output name=CNAME_Record::$CNAME_Record"
+           echo "::set-output name=IP::$IP"
+           echo "::set-output name=Exist_Record::$Exist_Record"
+           echo "::set-output name=Email::$Email"
+           
+ 
+     
+       - name: Internal DNS Script
+         run: |
+            chmod +x ./Infoblox_DNS/scripts/manage_infobloxdns.sh
+            ./Infoblox_DNS/scripts/manage_infobloxdns.sh --action ${{ steps.input-script.outputs.Action }} --recordType ${{ steps.input-script.outputs.RecordType }} --environment ${{ steps.input-script.outputs.Environment }} --zone ${{ steps.input-script.outputs.Zone }} --ip ${{ steps.input-script.outputs.IP }} --record  ${{ steps.input-script.outputs.RecordName }} --aRecord ${{ steps.input-script.outputs.ARecord }} --cnameRecord ${{ steps.input-script.outputs.CNAME_Record }} --exrecord ${{ steps.input-script.outputs.Exist_Record }} --username $username  --password $password --server $hostip
+        
+     
+           
+       - name: Email Trigger for success notifications
+         shell: pwsh
+         run: |
+            ./Infoblox_DNS/scripts/success_notify_email.ps1 --Action "${{ steps.input-script.outputs.Action }}" -From "${{ steps.input-script.outputs.Email }}" -RecordType "${{ steps.input-script.outputs.RecordType }}" -RecordName "${{ steps.input-script.outputs.RecordName }}" -Zone "${{ steps.input-script.outputs.Zone }}" -IP "${{ steps.input-script.outputs.IP }}" -Alias "${{ steps.input-script.outputs.ARecord }}" -CRecord "${{ steps.input-script.outputs.CNAME_Record }}" -Exist "${{ steps.input-script.outputs.Exist_Record }}"
+ 
+ 
+       - name: Email Trigger for failure notifications
+         if: ${{ failure() }}
+         shell: pwsh
+         run: |
+          ./Infoblox_DNS/scripts/failure_notify_email.ps1 -action "${{ steps.input-script.outputs.Action }}" -RecordName "${{ steps.input-script.outputs.RecordName }}" -ExistRecord "${{ steps.input-script.outputs.Exist_Record }}" -Zone "${{ steps.input-script.outputs.Zone }}" -IP "${{ steps.input-script.outputs.IP }}" -mail "${{ steps.input-script.outputs.Email }}"  -RecordType   "${{ steps.input-script.outputs.RecordType }}" -Alias "${{ steps.input-script.outputs.ARecord  }}" -CRecord "${{ steps.input-script.outputs.CNAME_Record }}" -exc "${{ steps.input-script.outputs.Exist_Record }}"
+       
+      
+ DNS_Apply_Prod:
+    needs: check
+    runs-on: 
+    if: |
+      !failure() && !cancelled() && 
+      (needs.check.outputs.run_job == 'true')
+    environment:
+      name: prod
+    outputs:
+      output1: ${{ steps.input-script.outputs.Email }}
+      output2: ${{ steps.input-script.outputs.param }}
+      output3: ${{ steps.branch-name.outputs.current_branch }}
+      action: ${{ steps.input-script.outputs.Action }}
+
+      
+      
+    steps:
+       - uses: actions/checkout@v1
+       - name: Input Script
+         id: input-script
+         run: |
+           set -x
+           sha=`git log --format="%H" -n 1` # fetch latest commit sha 
+           echo "sha is printed"
+           echo $sha
+           parameter=$(git diff-tree -m --no-commit-id --name-only -r $sha | grep ".*.yaml") # get parameter path file 
+           echo "parameter is printed"
+           cat $parameter
+           echo $parameter
+           sudo add-apt-repository universe
+           sudo apt-get update
+           sudo apt-get install python3-pip
+           pip3 install yq
+           Action=$(yq -r .variables.Action $parameter)
+           RecordType=$(yq -r .variables.RecordType $parameter)
+           Environment=$(yq -r .variables.Environment $parameter)
+           Zone=$(yq -r .variables.Zone $parameter)
+           IP=$(yq -r .variables.IP $parameter)
+           RecordName=$(yq -r .variables.RecordName $parameter)
+           ARecord=$(yq -r .variables.ARecord $parameter)
+           CNAME_Record=$(yq -r .variables.CNAME_Record $parameter)
+           Exist_Record=$(yq -r .variables.Exist_Record $parameter)
+           Email=$(yq -r .variables.Email $parameter)
+           echo "::set-output name=param::$parameter"
+           echo "::set-output name=Action::$Action"
+           echo "::set-output name=RecordType::$RecordType"
+           echo "::set-output name=Environment::$Environment"
+           echo "::set-output name=Zone::$Zone"
+           echo "::set-output name=RecordName::$RecordName"
+           echo "::set-output name=ARecord::$ARecord"
+           echo "::set-output name=CNAME_Record::$CNAME_Record"
+           echo "::set-output name=IP::$IP"
+           echo "::set-output name=Exist_Record::$Exist_Record"
+           echo "::set-output name=Email::$Email"
+           
+        
+       - name: Internal DNS Script
+         run: |
+            chmod +x ./Infoblox_DNS/scripts/manage_infobloxdns.sh
+            ./Infoblox_DNS/scripts/manage_infobloxdns.sh --action ${{ steps.input-script.outputs.Action }} --recordType ${{ steps.input-script.outputs.RecordType }} --environment ${{ steps.input-script.outputs.Environment }} --zone ${{ steps.input-script.outputs.Zone }} --ip ${{ steps.input-script.outputs.IP }} --record  ${{ steps.input-script.outputs.RecordName }} --aRecord ${{ steps.input-script.outputs.ARecord }} --cnameRecord ${{ steps.input-script.outputs.CNAME_Record }} --exrecord ${{ steps.input-script.outputs.Exist_Record }} --username $username  --password $password --server $hostip
+        
+     
+           
+       - name: Email Trigger for success notifications
+         shell: pwsh
+         run: |
+            ./Infoblox_DNS/scripts/success_notify_email.ps1 --Action "${{ steps.input-script.outputs.Action }}" -From "${{ steps.input-script.outputs.Email }}" -RecordType "${{ steps.input-script.outputs.RecordType }}" -RecordName "${{ steps.input-script.outputs.RecordName }}" -Zone "${{ steps.input-script.outputs.Zone }}" -IP "${{ steps.input-script.outputs.IP }}" -Alias "${{ steps.input-script.outputs.ARecord }}" -CRecord "${{ steps.input-script.outputs.CNAME_Record }}" -Exist "${{ steps.input-script.outputs.Exist_Record }}"
+ 
+ 
+       - name: Email Trigger for failure notifications
+         if: ${{ failure() }}
+         shell: pwsh
+         run: |
+          ./Infoblox_DNS/scripts/failure_notify_email.ps1 -action "${{ steps.input-script.outputs.Action }}" -RecordName "${{ steps.input-script.outputs.RecordName }}" -ExistRecord "${{ steps.input-script.outputs.Exist_Record }}" -Zone "${{ steps.input-script.outputs.Zone }}" -IP "${{ steps.input-script.outputs.IP }}" -mail "${{ steps.input-script.outputs.Email }}"  -RecordType   "${{ steps.input-script.outputs.RecordType }}" -Alias "${{ steps.input-script.outputs.ARecord  }}" -CRecord "${{ steps.input-script.outputs.CNAME_Record }}" -exc "${{ steps.input-script.outputs.Exist_Record }}"
+          
+ 
+
+
+
+ Archive-and-Merge:       
+     needs: [DNS_Apply_NonProd,DNS_Apply_Prod]
+     runs-on: 
+     if: always() && (  needs.DNS_Apply_NonProd.result == 'success' || needs.DNS_Apply_NonProd.result == 'failure' || needs.DNS_Apply_Prod.result == 'success' || needs.DNS_Apply_Prod.result == 'failure'  )
+     steps:
+       - uses: actions/checkout@v1
+       - name: Copy to Archive
+         run: |
+            cp -rvf ./Infoblox_DNS/inputs/parameters/*  ./Infoblox_DNS/inputs/archive
+      
+
+      
+       - name: Remove Parameters Folder
+         run: |
+           rm -rvf ./Infoblox_DNS/inputs/parameters 
+           
+       - name: Commit files
+         run: |
+           git config --local user.email "Y0004714@marks-and-spencer.com"
+           git config --local user.name "Y0004714"
+           git add .
+           git commit -m "Add changes" -a
+           
+       - name: Push changes
+         uses: ad-m/github-push-action@master
+         with:
+          github_token: ${{ secrets.PAT }}  
+          
+
+       - name: Automerge
+         uses: "pascalgn/automerge-action@v0.13.1"
+         env:
+          GITHUB_TOKEN:  ${{ secrets.PAT }}
+          MERGE_METHOD: "merge"
+          MERGE_LABELS: ""
+          UPDATE_LABELS: "automerge"
+          MERGE_DELETE_BRANCH: "true"
+
