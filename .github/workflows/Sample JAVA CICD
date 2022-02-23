@@ -1,0 +1,36 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+      
+      
+    - uses: azure/docker-login@v1
+      with:
+          login-server: 
+          username: 
+          password: $ACR_PASSWORD        
+    - run: |
+          docker build . -t $ACR_SERVER_URL/leap:latest
+          docker push $ACR_SERVER_URL/leap:latest      
+          
+          
+     - name: "publish to webapp"
+       uses: azure/webapps-deploy@v2
+       with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} 
+          publish-profile: ${{ env.PUBLISH_PROFILE }}    
+          images: $ACR_SERVER_URL/leap:latest
