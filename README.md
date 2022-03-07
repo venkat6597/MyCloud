@@ -30,7 +30,7 @@
 ### 🛠 &nbsp;Tech Stack
 
 ![Kubernetes](https://img.shields.io/badge/-Kubernetes-05122A?style=flat&logo=kubernetes)&nbsp;
-![GithubActions](https://img.shields.io/badge/-GithubActions-05122A?style=flat&logo=Github)&nbsp;
+![GithubActions](https://img.shields.io/badge/-GithubActions-05122A?style=flat&logo=github)&nbsp;
 ![AzureDevops](https://img.shields.io/badge/-AzureDevops-05122A?style=flat&logo=azure-devops)&nbsp;
 ![Terraform](https://img.shields.io/badge/-Terraform-05122A?style=flat&logo=terraform)&nbsp;
 ![HTML](https://img.shields.io/badge/-HTML-05122A?style=flat&logo=HTML5)&nbsp;
