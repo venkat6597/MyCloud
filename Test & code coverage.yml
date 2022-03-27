@@ -24,6 +24,6 @@
     condition: succeededOrFailed()
     inputs:
       codeCoverageTool: 'Cobertura'
-      summaryFileLocation: 'coverage/foods-hub/cobertura-coverage.xml'
-      reportDirectory: 'coverage/foods-hub'
-      failIfCoverageEmpty: true      
+      summaryFileLocation: 'coverage/java/cobertura-coverage.xml'
+      reportDirectory: 'coverage/java'
+      failIfCoverageEmpty: false      
