@@ -11,18 +11,19 @@
      goals: 'package'
  
   - task: PublishTestResults@2
-      displayName: 'Publish - Unit test results'
-      condition: succeededOrFailed()
-      inputs:
-        searchFolder: $(System.DefaultWorkingDirectory)/junit
-        testResultsFormat: JUnit
-        testResultsFiles: "**/TESTS*.xml"
+    displayName: 'Publish - Unit test results'
+    condition: succeededOrFailed()
+    inputs:
+      searchFolder: $(System.DefaultWorkingDirectory)/junit
+      testRunTitle: 'Maven - Unit Testing'
+      testResultsFormat: JUnit
+      testResultsFiles: "**/TESTS*.xml"
         
   - task: PublishCodeCoverageResults@1
-      displayName: 'Publish - Unit test Code Coverage Results'
-      condition: succeededOrFailed()
-      inputs:
-        codeCoverageTool: 'Cobertura'
-        summaryFileLocation: 'coverage/foods-hub/cobertura-coverage.xml'
-        reportDirectory: 'coverage/foods-hub'
-        failIfCoverageEmpty: true      
+    displayName: 'Publish - Unit test Code Coverage Results'
+    condition: succeededOrFailed()
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: 'coverage/foods-hub/cobertura-coverage.xml'
+      reportDirectory: 'coverage/foods-hub'
+      failIfCoverageEmpty: true      
