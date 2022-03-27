@@ -15,7 +15,6 @@
       condition: succeededOrFailed()
       inputs:
         searchFolder: $(System.DefaultWorkingDirectory)/junit
-        testRunTitle: 'Maven - Unit Testing'
         testResultsFormat: JUnit
         testResultsFiles: "**/TESTS*.xml"
         
