@@ -10,21 +10,3 @@
      codeCoverageToolOption: 'Cobertura'
      testResultsFiles: '**/surefire-reports/TEST-*.xml'
      goals: 'package'
- 
-  - task: PublishTestResults@2
-    displayName: 'Publish - Unit test results'
-    condition: succeededOrFailed()
-    inputs:
-      searchFolder: $(System.DefaultWorkingDirectory)/junit
-      testRunTitle: 'Maven - Unit Testing'
-      testResultsFormat: JUnit
-      testResultsFiles: "**/TESTS*.xml"
-        
-  - task: PublishCodeCoverageResults@1
-    displayName: 'Publish - Unit test Code Coverage Results'
-    condition: succeededOrFailed()
-    inputs:
-      codeCoverageTool: 'Cobertura'
-      summaryFileLocation: 'coverage/java/cobertura-coverage.xml'
-      reportDirectory: 'coverage/java'
-      failIfCoverageEmpty: false      
