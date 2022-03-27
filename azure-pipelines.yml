@@ -9,7 +9,7 @@ stages:
       - job: 'BuildJAR'
         displayName: 'Java Application'
         steps:
-          - template: azure-pipelines.yml
+          - template: build.yml
       
   - stage: 'Copy and Publish'
     displayName: 'Copy'
