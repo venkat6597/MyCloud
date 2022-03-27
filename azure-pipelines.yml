@@ -10,11 +10,3 @@ stages:
         displayName: 'Java Application'
         steps:
           - template: build.yml
-      
-  - stage: 'CopyandPublish'
-    displayName: 'Copy'
-    jobs:
-      - job: 'Publish'
-        displayName: 'Publish'
-        steps:
-          - template: Java.yml
