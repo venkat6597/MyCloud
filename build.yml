@@ -1,6 +1,6 @@
- steps:
-  - task: Maven@3
-    inputs:
+steps:
+ - task: Maven@3
+   inputs:
      mavenPomFile: '$(system.defaultWorkingDirectory)/SampleJavaApp/java-junit-sample/pom.xml'
      mavenOptions: '-Xmx3072m'
      javaHomeOption: 'JDKVersion'
