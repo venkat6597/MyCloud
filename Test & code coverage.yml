@@ -10,7 +10,7 @@
      testResultsFiles: '**/surefire-reports/TEST-*.xml'
      goals: 'package'
  
- - task: PublishTestResults@2
+  - task: PublishTestResults@2
       displayName: 'Publish - Unit test results'
       condition: succeededOrFailed()
       inputs:
@@ -19,7 +19,7 @@
         testResultsFormat: JUnit
         testResultsFiles: "**/TESTS*.xml"
         
- - task: PublishCodeCoverageResults@1
+  - task: PublishCodeCoverageResults@1
       displayName: 'Publish - Unit test Code Coverage Results'
       condition: succeededOrFailed()
       inputs:
