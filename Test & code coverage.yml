@@ -1,0 +1,29 @@
+ steps:
+  - task: Maven@3
+    inputs:
+     mavenPomFile: '$(system.defaultWorkingDirectory)/Sample_CICD_Build&Release/pom.xml'
+     mavenOptions: '-Xmx3072m'
+     javaHomeOption: 'JDKVersion'
+     jdkVersionOption: '1.8'
+     jdkArchitectureOption: 'x64'
+     publishJUnitResults: true
+     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+     goals: 'package'
+ 
+ - task: PublishTestResults@2
+      displayName: 'Publish - Unit test results'
+      condition: succeededOrFailed()
+      inputs:
+        searchFolder: $(System.DefaultWorkingDirectory)/junit
+        testRunTitle: 'Maven - Unit Testing'
+        testResultsFormat: JUnit
+        testResultsFiles: "**/TESTS*.xml"
+        
+ - task: PublishCodeCoverageResults@1
+      displayName: 'Publish - Unit test Code Coverage Results'
+      condition: succeededOrFailed()
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: 'coverage/foods-hub/cobertura-coverage.xml'
+        reportDirectory: 'coverage/foods-hub'
+        failIfCoverageEmpty: true      
