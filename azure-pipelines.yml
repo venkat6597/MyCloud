@@ -3,10 +3,18 @@ pool:
 
 stages:
   #Build Java
-  - stage: 'Maven'
+  - stage: 'Test'
+    displayName: 'Test Result'
+    jobs:
+      - job: 'Test'
+        displayName: 'Test Java Project'
+        steps:
+          - template: Test & code coverage.yml
+
+  - stage: 'Build'
     displayName: 'Maven Java'
     jobs:
       - job: 'BuildJAR'
-        displayName: 'Java Application'
+        displayName: 'Build Java Project'
         steps:
-          - template: build.yml
+          - template: build.yml 
