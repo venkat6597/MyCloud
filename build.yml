@@ -1,6 +1,6 @@
 steps:
-- task: Maven@3
-  inputs:
+ - task: Maven@3
+   inputs:
     mavenPomFile: '$(system.defaultWorkingDirectory)/Sample_CICD_Build&Release/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
@@ -9,7 +9,7 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
-
+    
  - task: CopyFiles@2
    inputs:
     Contents: '**/*.war'
