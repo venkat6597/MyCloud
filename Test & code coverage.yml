@@ -1,7 +1,7 @@
  steps:
   - task: Maven@3
     inputs:
-     mavenPomFile: '$(system.defaultWorkingDirectory)/SampleJavaApp/java-junit-sample/pom.xml'
+     mavenPomFile: '$(system.defaultWorkingDirectory)/Sample_CICD_Build&Release/pom.xml'
      mavenOptions: '-Xmx3072m'
      javaHomeOption: 'JDKVersion'
      jdkVersionOption: '1.8'
