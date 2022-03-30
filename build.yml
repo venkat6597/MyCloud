@@ -13,7 +13,7 @@ steps:
     
  - task: CopyFiles@2
    inputs:
-    Contents: '**/*.warr'
+    Contents: '**/*.war'
     TargetFolder: '$(build.artifactstagingdirectory)'
     
   
