@@ -22,3 +22,16 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+
+
+ - task: Docker@2
+   inputs:
+    containerRegistry: 'sampledock'
+    command: 'login'
+
+ - task: Docker@2
+   inputs:
+       containerRegistry: 'sampledock'
+       repository: 'venkat6597 / tomcat'
+       command: 'buildAndPush'
+       Dockerfile: '**/Sample_CICD_Build&Release/AzureDockerfile'
